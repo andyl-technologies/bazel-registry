@@ -3,6 +3,7 @@
   "integrity": "sha256-+tYjtNDb54g//8laMnXqq/0TvZM2/KZ4jLQL7pbl8TE=",
   "patch_strip": 1,
   "patches": {
-    "patches/001-pass-xcode-sdk-variant-info.patch": "sha256-aBCgUGvYNQEZgENg7HxUPbCx+YoWX3hT8Pd1Fq03WvA="
+    "001-module-dot-bazel-version.patch": "sha256-b56l5+00Bimlg9rn/JtTMeKHLmRTrBWBPVtZJZVnxbc=",
+    "002-pass-xcode-sdk-variant-info.patch": "sha256-aBCgUGvYNQEZgENg7HxUPbCx+YoWX3hT8Pd1Fq03WvA="
   }
 }

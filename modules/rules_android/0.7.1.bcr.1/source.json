@@ -4,6 +4,6 @@
   "strip_prefix": "rules_android-0.7.1",
   "patch_strip": 1,
   "patches": {
-    "patches/use_default_shell_env.patch": "sha256-dOKQZ2dp9mEJnbzXc5zf6vEvYoD6UU+D4xbKX3+nmus="
+    "001-use-default-shell-env.patch": "sha256-dOKQZ2dp9mEJnbzXc5zf6vEvYoD6UU+D4xbKX3+nmus="
   }
 }

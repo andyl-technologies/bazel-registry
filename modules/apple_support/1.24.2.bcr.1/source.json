@@ -3,8 +3,9 @@
   "integrity": "sha256-hiXMe3spUuOBAeF7Sp58BDs6efVdJuR3KBmJGZhyXhY=",
   "patch_strip": 1,
   "patches": {
-    "patches/001-custom-sdk-paths.patch": "sha256-jqxHQYVWtHWPu801Ug8UkLfW/KfUObDVR+qO7wURi9c=",
-    "patches/002-add-nodeps-dynamic-library-action.patch": "sha256-adaJwkiWHksqdmTtUNxMXh4CjmbQcvLY76e7LrN8Qb4=",
-    "patches/003-use-path-clang-for-tools.patch": "sha256-fg93/VYL/BHUXP8+04csy4rfeiYmw5J57U3geAMBTkw="
+    "001-module-dot-bazel-version.patch": "sha256-A3ZRtKfpRjlCF3smkeJrNiKUYS5MLHq/e94xM+roWi4=",
+    "002-custom-sdk-paths.patch": "sha256-jqxHQYVWtHWPu801Ug8UkLfW/KfUObDVR+qO7wURi9c=",
+    "003-add-nodeps-dynamic-library-action.patch": "sha256-adaJwkiWHksqdmTtUNxMXh4CjmbQcvLY76e7LrN8Qb4=",
+    "004-use-path-clang-for-tools.patch": "sha256-fg93/VYL/BHUXP8+04csy4rfeiYmw5J57U3geAMBTkw="
   }
 }
