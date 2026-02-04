@@ -1,0 +1,8 @@
+{
+  "url": "https://github.com/bazelbuild/rules_apple/releases/download/4.3.3/rules_apple.4.3.3.tar.gz",
+  "integrity": "sha256-+tYjtNDb54g//8laMnXqq/0TvZM2/KZ4jLQL7pbl8TE=",
+  "patch_strip": 1,
+  "patches": {
+    "patches/001-pass-xcode-sdk-variant-info.patch": "sha256-aBCgUGvYNQEZgENg7HxUPbCx+YoWX3hT8Pd1Fq03WvA="
+  }
+}

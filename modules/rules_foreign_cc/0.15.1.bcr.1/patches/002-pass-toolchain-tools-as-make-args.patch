@@ -1,0 +1,158 @@
+diff --git a/foreign_cc/private/configure_script.bzl b/foreign_cc/private/configure_script.bzl
+index bbb5056..432df39 100644
+--- a/foreign_cc/private/configure_script.bzl
++++ b/foreign_cc/private/configure_script.bzl
+@@ -75,9 +75,12 @@ def create_configure_script(
+ 
+     script.append("##mkdirs## $$BUILD_TMPDIR$$/$$INSTALL_PREFIX$$")
+ 
+-    make_commands = []
++    # Get env vars and tool vars separately - tools need to be make arguments
++    # so they're inherited by sub-makes (env prefix vars are not inherited)
++    configure_env_vars, tool_vars = get_make_env_vars(workspace_name, tools, flags, env_vars, deps, inputs, is_msvc, make_path)
++    # Export tool vars (CC, CXX, etc.) as env vars for configure AND pass to make as arguments
+     script.append("{env_vars} {prefix}\"{configure}\" {prefix_flag}$$BUILD_TMPDIR$$/$$INSTALL_PREFIX$$ {user_options}".format(
+-        env_vars = get_make_env_vars(workspace_name, tools, flags, env_vars, deps, inputs, is_msvc, make_commands),
++        env_vars = (configure_env_vars + " " + tool_vars).strip(),
+         prefix = configure_prefix,
+         configure = configure_path,
+         prefix_flag = prefix_flag,
+@@ -88,10 +91,12 @@ def create_configure_script(
+ 
+     make_commands = []
+     for target in make_targets:
+-        make_commands.append("{prefix}{make} {make_vars} {target} {args}".format(
++        # Pass tool_vars as make arguments so they're inherited by sub-makes
++        make_commands.append("{prefix}{make} {make_vars} {tool_vars} {target} {args}".format(
+             prefix = make_prefix,
+             make = make_path,
+             make_vars = ldflags_make_vars,
++            tool_vars = tool_vars,
+             args = make_args,
+             target = target,
+         ))
+diff --git a/foreign_cc/private/make_env_vars.bzl b/foreign_cc/private/make_env_vars.bzl
+index 1914012..58b907c 100644
+--- a/foreign_cc/private/make_env_vars.bzl
++++ b/foreign_cc/private/make_env_vars.bzl
+@@ -12,13 +12,14 @@ def get_make_env_vars(
+         deps,
+         inputs,
+         is_msvc,
+-        make_commands):
+-    vars = _get_make_variables(workspace_name, tools, flags, user_vars, make_commands)
++        make_path):
++    is_nmake = make_path and "nmake.exe" in make_path
++    vars, tool_vars = _get_make_variables(workspace_name, tools, flags, user_vars, is_nmake)
+     deps_flags = _define_deps_flags(deps, inputs, is_msvc)
+ 
+-    # For cross-compilation.
+-    if "RANLIB" not in vars.keys():
+-        vars["RANLIB"] = [":"]
++    # For cross-compilation - RANLIB must be in tool_vars to be passed as make argument
++    if "RANLIB" not in tool_vars.keys():
++        tool_vars["RANLIB"] = [":"]
+ 
+     if "LDFLAGS" in vars.keys():
+         vars["LDFLAGS"] = vars["LDFLAGS"] + deps_flags.libs
+@@ -32,8 +33,12 @@ def get_make_env_vars(
+     else:
+         vars["CPPFLAGS"] = deps_flags.flags
+ 
+-    return " ".join(["{}=\"{}\""
++    env_str = " ".join(["{}=\"{}\""
+         .format(key, _join_flags_list(workspace_name, vars[key])) for key in vars])
++    tool_str = " ".join(["{}=\"{}\""
++        .format(key, _join_flags_list(workspace_name, tool_vars[key])) for key in tool_vars])
++
++    return env_str, tool_str
+ 
+ # buildifier: disable=function-docstring
+ def get_ldflags_make_vars(
+@@ -121,7 +126,7 @@ _MAKE_TOOLS = {
+     # missing: cxx_linker_executable
+ }
+ 
+-def _get_make_variables(workspace_name, tools, flags, user_env_vars, make_commands):
++def _get_make_variables(workspace_name, tools, flags, user_env_vars, is_nmake):
+     vars = _merge_env_vars(flags, _MAKE_FLAGS, user_env_vars)
+ 
+     # Add user defined CPPFLAGS
+@@ -129,7 +134,7 @@ def _get_make_variables(workspace_name, tools, flags, user_env_vars, make_comman
+     if user_cpp_flags:
+         vars["CPPFLAGS"] = user_cpp_flags
+ 
+-    tools_dict = {}
++    tool_vars = {}
+     for tool in _MAKE_TOOLS:
+         tool_value = getattr(tools, _MAKE_TOOLS[tool])
+         if tool_value:
+@@ -141,23 +146,22 @@ def _get_make_variables(workspace_name, tools, flags, user_env_vars, make_comman
+             #    MSYS2 requires that the path is wrapped in double quotes.
+             # 2. If nmake is used, it requires the tool path to be wrapped in double quotes,
+             #    otherwise nmake will output the command as a string instead of executing it.
+-            if " " in tool_value_absolute or _nmake_in_make_commands(make_commands):
++            if " " in tool_value_absolute or is_nmake:
+                 tool_value_absolute = "\\\"" + tool_value_absolute + "\\\""
+ 
+-            tools_dict[tool] = [tool_value_absolute]
++            tool_vars[tool] = [tool_value_absolute]
+ 
+     # Replace tools paths if user passed other values
+     for user_var in user_env_vars:
+-        toolchain_val = tools_dict.get(user_var)
++        toolchain_val = tool_vars.get(user_var)
+         if toolchain_val:
+-            tools_dict[user_var] = [user_env_vars[user_var]]
+-
+-    vars.update(tools_dict)
++            tool_vars[user_var] = [user_env_vars[user_var]]
+ 
++    # Do not merge tool_vars into vars - return them separately
++    # so they can be passed as make arguments (inherited by sub-makes)
+     # Do not put in the other user-defined env variables at this point as they
+     # have already been exported globally by the prelude.
+-
+-    return vars
++    return vars, tool_vars
+ 
+ def _get_ldflags_vars(
+         executable_ldflags_vars,
+@@ -192,6 +196,3 @@ def _absolutize(workspace_name, text, force = False):
+ 
+ def _join_flags_list(workspace_name, flags):
+     return " ".join([_absolutize(workspace_name, flag) for flag in flags])
+-
+-def _nmake_in_make_commands(make_commands):
+-    return make_commands and "nmake.exe" in make_commands[0]
+diff --git a/foreign_cc/private/make_script.bzl b/foreign_cc/private/make_script.bzl
+index 0dd6126..1e5b782 100644
+--- a/foreign_cc/private/make_script.bzl
++++ b/foreign_cc/private/make_script.bzl
+@@ -29,19 +29,23 @@ def create_make_script(
+ 
+     ldflags_make_vars = get_ldflags_make_vars(executable_ldflags_vars, shared_ldflags_vars, workspace_name, flags, env_vars, deps, inputs, is_msvc)
+ 
++    # Get env vars and tool vars separately - tools need to be make arguments
++    # so they're inherited by sub-makes (env prefix vars are not inherited)
++    configure_vars, tool_vars = get_make_env_vars(workspace_name, tools, flags, env_vars, deps, inputs, is_msvc, make_path)
++
+     make_commands = []
+     for target in make_targets:
+-        make_commands.append("{prefix}{make} {make_vars} {target} {args} PREFIX={install_prefix}".format(
++        # Pass tool_vars as make arguments so they're inherited by sub-makes
++        make_commands.append("{prefix}{make} {make_vars} {tool_vars} {target} {args} PREFIX={install_prefix}".format(
+             prefix = make_prefix,
+             make = make_path,
+             make_vars = ldflags_make_vars,
++            tool_vars = tool_vars,
+             args = make_args,
+             target = target,
+             install_prefix = make_install_prefix,
+         ))
+ 
+-    configure_vars = get_make_env_vars(workspace_name, tools, flags, env_vars, deps, inputs, is_msvc, make_commands)
+-
+     script.extend(["{env_vars} {command}".format(
+         env_vars = configure_vars,
+         command = command,

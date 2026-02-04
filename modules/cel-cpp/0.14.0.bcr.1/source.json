@@ -1,0 +1,9 @@
+{
+  "url": "https://github.com/google/cel-cpp/archive/refs/tags/v0.14.0.tar.gz",
+  "integrity": "sha256-Ck+aHAvMg2Kesw0cJ4iD0y3sD3Ae/Nq9e+vzP++Nq3E=",
+  "strip_prefix": "cel-cpp-0.14.0",
+  "patch_strip": 1,
+  "patches": {
+    "patches/001-unused-parameter-typeinfo.patch": "sha256-T86O2bt19D+JkUw0TXxGOsd07Tnj5hQBZYkr0vuzn10="
+  }
+}

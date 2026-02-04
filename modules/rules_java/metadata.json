@@ -1,0 +1,7 @@
+{
+  "homepage": "https://github.com/bazelbuild/rules_java",
+  "maintainers": [],
+  "repository": ["github:bazelbuild/rules_java"],
+  "versions": ["9.3.0.bcr.1"],
+  "yanked_versions": {}
+}

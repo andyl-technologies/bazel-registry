@@ -1,0 +1,11 @@
+{
+  "url": "https://github.com/tweag/rules_nixpkgs/archive/cb0f9be1798131ea4336fd02b850edeeb1972680.tar.gz",
+  "integrity": "sha256-xQQb/x9h1OfDrinsa5N09e7KUv8opAoUbVxGKtQtv4E=",
+  "strip_prefix": "rules_nixpkgs-cb0f9be1798131ea4336fd02b850edeeb1972680/toolchains/python",
+  "patch_strip": 1,
+  "patches": {
+    "patches/001-use-interpreter-file.patch": "sha256-2+dMQMYuUOsXA0dyvoj5BMdhRIPJdAxazD+D+JMhTH8=",
+    "patches/002-bazel8-py-runtime-pair.patch": "sha256-q08Mr9N525+H+uVb+HWghaX5jelq5AmR4ScgWcCMUqk=",
+    "patches/003-remove-target-constraints.patch": "sha256-dz4QR5s1BDbLjmMFlYT8Rb7RjjCtGF7Jv8fSrRXhKHo="
+  }
+}

@@ -1,0 +1,40 @@
+--- private/cc_toolchain/osx_cc_wrapper.sh.tpl
++++ private/cc_toolchain/osx_cc_wrapper.sh.tpl
+@@ -1,4 +1,4 @@
+-#!/usr/bin/env bash
++#!%{bash}
+ #
+ # Copyright 2015 The Bazel Authors. All rights reserved.
+ #
+@@ -105,7 +105,7 @@ function get_otool_path() {
+ }
+
+ function call_install_name() {
+-    /usr/bin/xcrun install_name_tool -change $(get_otool_path "$1") \
++    %{install_name_tool} -change $(get_otool_path "$1") \
+         "@loader_path/$2/$3" "${OUTPUT}"
+ }
+
+@@ -113,9 +113,9 @@ function call_install_name() {
+ for rpath in ${RPATHS}; do
+     for lib in ${LIBS}; do
+         unset libname
+-        if [ -f "$(/usr/bin/dirname ${OUTPUT})/${rpath}/lib${lib}.so" ]; then
++        if [ -f "$(%{dirname} ${OUTPUT})/${rpath}/lib${lib}.so" ]; then
+             libname="lib${lib}.so"
+-        elif [ -f "$(/usr/bin/dirname ${OUTPUT})/${rpath}/lib${lib}.dylib" ]; then
++        elif [ -f "$(%{dirname} ${OUTPUT})/${rpath}/lib${lib}.dylib" ]; then
+             libname="lib${lib}.dylib"
+         fi
+         # ${libname-} --> return $libname if defined, or undefined otherwise. This is to make
+@@ -128,8 +128,8 @@ for rpath in ${RPATHS}; do
+     done
+     for libpath in ${LIB_PATHS}; do
+         if [ -f "$libpath" ]; then
+-            libname=$(/usr/bin/basename "$libpath")
+-            if [ -f "$(/usr/bin/dirname ${OUTPUT})/${rpath}/${libname}" ]; then
++            libname=$(%{basename} "$libpath")
++            if [ -f "$(%{dirname} ${OUTPUT})/${rpath}/${libname}" ]; then
+                 call_install_name "${libpath}" "${rpath}" "${libname}"
+             fi
+         fi

@@ -1,0 +1,7 @@
+{
+  "homepage": "https://github.com/bazelbuild/rules_android",
+  "maintainers": [],
+  "repository": ["github:bazelbuild/rules_android"],
+  "versions": ["0.7.1.bcr.1"],
+  "yanked_versions": {}
+}

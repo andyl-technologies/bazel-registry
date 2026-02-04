@@ -1,0 +1,74 @@
+--- a/apple/internal/xcframework_rules.bzl	2026-02-02 15:31:19.460524460 -0800
++++ b/apple/internal/xcframework_rules.bzl	2026-02-02 15:32:26.135354749 -0800
+@@ -20,6 +20,10 @@
+     "@build_bazel_apple_support//lib:apple_support.bzl",
+     "apple_support",
+ )
++load(
++    "@build_bazel_apple_support//xcode:providers.bzl",
++    "XcodeSdkVariantInfo",
++)
+ load("@build_bazel_rules_swift//swift:swift.bzl", "SwiftInfo")
+ load(
+     "//apple:providers.bzl",
+@@ -364,7 +368,8 @@
+         available_libraries,
+         plisttool,
+         rule_label,
+-        xcode_config):
++        xcode_config,
++        xcode_sdk_variant_info = None):
+     """Generates a root Info.plist for a given XCFramework.
+ 
+      Args:
+@@ -375,6 +380,7 @@
+         plisttool: A files_to_run for the plist tool.
+         rule_label: The label of the target being analyzed.
+         xcode_config: The `apple_common.XcodeVersionConfig` provider from the context.
++        xcode_sdk_variant_info: Optional XcodeSdkVariantInfo provider for custom SDK paths.
+ 
+     Returns:
+         A `File` representing a root Info.plist to be embedded within an XCFramework bundle.
+@@ -416,6 +422,7 @@
+         mnemonic = "CreateXCFrameworkRootInfoPlist",
+         outputs = [root_info_plist],
+         xcode_config = xcode_config,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+     )
+     return root_info_plist
+ 
+@@ -825,6 +832,9 @@
+             platform = link_output.platform,
+         ))
+ 
++    # Get XcodeSdkVariantInfo if available (for custom SDK paths like nixpkgs)
++    xcode_sdk_variant_info = ctx.attr._xcode_config[XcodeSdkVariantInfo] if XcodeSdkVariantInfo in ctx.attr._xcode_config else None
++
+     root_info_plist = _create_xcframework_root_infoplist(
+         actions = actions,
+         apple_fragment = ctx.fragments.apple,
+@@ -832,6 +842,7 @@
+         plisttool = apple_mac_toolchain_info.plisttool,
+         rule_label = label,
+         xcode_config = xcode_config,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+     )
+ 
+     _create_xcframework_bundle(
+@@ -1031,6 +1042,8 @@
+         unsupported_features = ctx.disabled_features,
+     )
+     xcode_config = ctx.attr._xcode_config[apple_common.XcodeVersionConfig]
++    # Get XcodeSdkVariantInfo if available (for custom SDK paths like nixpkgs)
++    xcode_sdk_variant_info = ctx.attr._xcode_config[XcodeSdkVariantInfo] if XcodeSdkVariantInfo in ctx.attr._xcode_config else None
+ 
+     tree_artifact_enabled = False
+     outputs_archive = ctx.outputs.archive
+@@ -1223,6 +1236,7 @@
+         plisttool = apple_mac_toolchain_info.plisttool,
+         rule_label = label,
+         xcode_config = xcode_config,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+     )
+ 
+     _create_xcframework_bundle(

@@ -1,0 +1,11 @@
+--- python.bzl.orig
++++ python.bzl
+@@ -91,7 +91,7 @@
+     cat >>$n <<EOF
+     py_runtime(
+         name = "runtime",
+-        interpreter_path = "${{interpreterPath}}",
++        interpreter = "bin/python",
+         python_version = "{version}",
+         ${{lib.optionalString addShebang ''
+           stub_shebang = "$(cat ${{shebangLine interpreterPath}})",

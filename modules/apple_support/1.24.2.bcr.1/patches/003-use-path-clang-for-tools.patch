@@ -1,0 +1,23 @@
+--- a/crosstool/universal_exec_tool.bzl
++++ b/crosstool/universal_exec_tool.bzl
+@@ -27,15 +27,15 @@
+         name = name + ".target_config",
+         srcs = srcs,
+         outs = [out],
++        # Use clang directly from PATH instead of xcrun, since nixpkgs setups
++        # have clang in PATH but not inside DEVELOPER_DIR/Toolchains.
++        # Keep SDKROOT set via -isysroot for headers/libraries.
+         cmd = """
+-env -i \
+-  DEVELOPER_DIR="$${DEVELOPER_DIR:-}" \
+-  xcrun \
+-    --sdk macosx \
+-    clang \
++clang \
+     -mmacosx-version-min=10.15 \
+     -std=c++17 \
+     -lc++ \
++    -isysroot "$${SDKROOT:-}" \
+     -arch arm64 \
+     -arch x86_64 \
+     -O3 \

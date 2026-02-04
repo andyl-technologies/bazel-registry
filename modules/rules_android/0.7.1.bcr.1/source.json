@@ -1,0 +1,9 @@
+{
+  "url": "https://github.com/bazelbuild/rules_android/releases/download/v0.7.1/rules_android-v0.7.1.tar.gz",
+  "integrity": "sha256-fEW2qqg3+28vI60ROHY4ywD6n4OaBOxWTKrHClQ6nNU=",
+  "strip_prefix": "rules_android-0.7.1",
+  "patch_strip": 1,
+  "patches": {
+    "patches/use_default_shell_env.patch": "sha256-dOKQZ2dp9mEJnbzXc5zf6vEvYoD6UU+D4xbKX3+nmus="
+  }
+}

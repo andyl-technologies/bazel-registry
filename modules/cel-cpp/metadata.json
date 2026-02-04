@@ -1,0 +1,7 @@
+{
+  "homepage": "https://github.com/google/cel-cpp",
+  "maintainers": [],
+  "repository": ["github:google/cel-cpp"],
+  "versions": ["0.14.0.bcr.1"],
+  "yanked_versions": {}
+}

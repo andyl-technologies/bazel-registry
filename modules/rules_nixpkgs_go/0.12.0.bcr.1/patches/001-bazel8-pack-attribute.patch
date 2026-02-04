@@ -1,0 +1,45 @@
+--- go.bzl
++++ go.bzl
+@@ -140,7 +140,8 @@ def declare_toolchains(host_goos, host_goarch):
+             goos = p.goos,
+             goarch = p.goarch,
+             sdk = "@{sdk_repo}//:go_sdk",
+-            builder = "@{sdk_repo}//:builder",
++            builder = "@{sdk_repo}//:builder_reset",
++            pack = "@{sdk_repo}//:pack_reset",
+             link_flags = link_flags,
+             cgo_link_flags = cgo_link_flags,
+             visibility = ["//visibility:public"],
+@@ -217,6 +218,7 @@ go_sdk_build = \"\"\"
+ load("@{rules_go}//go/private/rules:binary.bzl", "go_tool_binary")
+ load("@{rules_go}//go/private/rules:sdk.bzl", "package_list")
+ load("@{rules_go}//go:def.bzl", "go_sdk", "RULES_GO_VERSION")
++load("@{rules_go}//go/private/rules:transition.bzl", "non_go_reset_target")
+ load("@{helpers}//:go_sdk.bzl", "go_sdk_for_arch")
+ load(":go_version.bzl", "go_version")
+
+@@ -247,6 +249,7 @@ go_tool_binary(
+     name = "builder",
+     srcs = ["@{rules_go}//go/tools/builders:builder_srcs"],
+     ldflags = "-X main.rulesGoStdlibPrefix=@{rules_go}//stdlib:" if TOOL_BINARY_NEEDS_STDLIB_PREFIX else None,
++    out_pack = "pack.exe",
+     sdk = ":go_sdk",
+ )
+
+@@ -254,6 +257,16 @@ go_tool_binary(
+     sdk = ":go_sdk",
+ )
+
++non_go_reset_target(
++    name = "builder_reset",
++    dep = ":builder",
++)
++
++non_go_reset_target(
++    name = "pack_reset",
++    dep = ":pack.exe",
++)
++
+ package_list(
+     name = "package_list",
+     srcs = [":srcs"],

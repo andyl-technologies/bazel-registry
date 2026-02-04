@@ -1,0 +1,8 @@
+{
+  "url": "https://github.com/bazelbuild/rules_java/releases/download/9.3.0/rules_java-9.3.0.tar.gz",
+  "integrity": "sha256-bvJtT5eOi0z1zh1HUy1wy2LNGEMSJ6HIAHyPeEMkPAY=",
+  "patch_strip": 1,
+  "patches": {
+    "patches/use_source_built_tools.patch": "sha256-r833P0octXKnMkZimwV/xWGw9E/gTxWl7ME87ODK8Xc="
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "url": "https://github.com/bazelbuild/apple_support/releases/download/1.24.2/apple_support.1.24.2.tar.gz",
+  "integrity": "sha256-hiXMe3spUuOBAeF7Sp58BDs6efVdJuR3KBmJGZhyXhY=",
+  "patch_strip": 1,
+  "patches": {
+    "patches/001-custom-sdk-paths.patch": "sha256-jqxHQYVWtHWPu801Ug8UkLfW/KfUObDVR+qO7wURi9c=",
+    "patches/002-add-nodeps-dynamic-library-action.patch": "sha256-adaJwkiWHksqdmTtUNxMXh4CjmbQcvLY76e7LrN8Qb4=",
+    "patches/003-use-path-clang-for-tools.patch": "sha256-fg93/VYL/BHUXP8+04csy4rfeiYmw5J57U3geAMBTkw="
+  }
+}

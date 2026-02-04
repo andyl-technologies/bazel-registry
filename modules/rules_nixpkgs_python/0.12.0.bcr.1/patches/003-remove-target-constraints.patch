@@ -1,0 +1,10 @@
+--- python.bzl
++++ python.bzl
+@@ -32,7 +32,6 @@ toolchain(
+     toolchain = ":py_runtime_pair",
+     toolchain_type = "@rules_python//python:toolchain_type",
+     exec_compatible_with = {exec_constraints},
+-    target_compatible_with = {target_constraints},
+ )
+ """.format(
+         python3_runtime = label_string(python3_runtime),

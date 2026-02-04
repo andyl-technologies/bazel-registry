@@ -1,0 +1,7 @@
+{
+  "homepage": "https://github.com/bazelbuild/rules_apple",
+  "maintainers": [],
+  "repository": ["github:bazelbuild/rules_apple"],
+  "versions": ["4.3.3.bcr.1"],
+  "yanked_versions": {}
+}

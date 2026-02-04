@@ -1,0 +1,401 @@
+diff --git a/lib/apple_support.bzl b/lib/apple_support.bzl
+index 86a0dcf..64dbe51 100644
+--- a/lib/apple_support.bzl
++++ b/lib/apple_support.bzl
+@@ -170,6 +170,7 @@ def _kwargs_for_apple_platform(
+         *,
+         apple_fragment,
+         xcode_config,
++        xcode_sdk_variant_info = None,
+         **kwargs):
+     """Returns a modified dictionary with required arguments to run on Apple platforms."""
+     processed_args = dict(kwargs)
+@@ -182,12 +183,21 @@ def _kwargs_for_apple_platform(
+     if "use_default_shell_env" not in processed_args:
+         processed_args["use_default_shell_env"] = True
+ 
+-    # Add the environment variables required for DEVELOPER_DIR and SDKROOT last to avoid clients
+-    # overriding these values.
+-    merged_env.update(apple_common.apple_host_system_env(xcode_config))
+-    merged_env.update(
+-        apple_common.target_apple_env(xcode_config, apple_fragment.single_arch_platform),
+-    )
++    # Check if we have custom SDK paths configured (e.g., from a custom SDK repo like nixpkgs).
++    # If both developer_dir and sdk_root are set, use those instead of calling xcrun/xcodebuild.
++    custom_developer_dir = getattr(xcode_sdk_variant_info, "developer_dir", None) if xcode_sdk_variant_info else None
++    custom_sdk_root = getattr(xcode_sdk_variant_info, "sdk_root", None) if xcode_sdk_variant_info else None
++
++    if custom_developer_dir and custom_sdk_root:
++        # Use the custom SDK paths instead of querying Xcode
++        merged_env["DEVELOPER_DIR"] = custom_developer_dir
++        merged_env["SDKROOT"] = custom_sdk_root
++    else:
++        # Fall back to native Xcode lookup via xcrun/xcodebuild
++        merged_env.update(apple_common.apple_host_system_env(xcode_config))
++        merged_env.update(
++            apple_common.target_apple_env(xcode_config, apple_fragment.single_arch_platform),
++        )
+ 
+     merged_execution_requirements = {}
+     original_execution_requirements = processed_args.get("execution_requirements")
+@@ -281,6 +291,7 @@ def _run(
+         xcode_config,
+         apple_fragment,
+         xcode_path_resolve_level = _XCODE_PATH_RESOLVE_LEVEL.none,
++        xcode_sdk_variant_info = None,
+         **kwargs):
+     """Registers an action to run on an Apple machine.
+ 
+@@ -325,12 +336,16 @@ def _run(
+             context. Typically from `ctx.attr._xcode_config[apple_common.XcodeVersionConfig]`.
+         apple_fragment: A reference to the apple fragment. Typically from `ctx.fragments.apple`.
+         xcode_path_resolve_level: The level of Xcode path replacement required for the action.
++        xcode_sdk_variant_info: Optional XcodeSdkVariantInfo provider. When provided with
++            developer_dir and sdk_root fields set, these paths will be used instead of
++            querying Xcode via xcrun.
+         **kwargs: See `ctx.actions.run` for the rest of the available arguments.
+     """
+     if xcode_path_resolve_level == _XCODE_PATH_RESOLVE_LEVEL.none:
+         actions.run(**_kwargs_for_apple_platform(
+             xcode_config = xcode_config,
+             apple_fragment = apple_fragment,
++            xcode_sdk_variant_info = xcode_sdk_variant_info,
+             **kwargs
+         ))
+         return
+@@ -354,6 +369,7 @@ def _run(
+     processed_kwargs = _kwargs_for_apple_platform(
+         xcode_config = xcode_config,
+         apple_fragment = apple_fragment,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+         **kwargs
+     )
+ 
+@@ -408,6 +424,7 @@ def _run_shell(
+         actions,
+         xcode_config,
+         apple_fragment,
++        xcode_sdk_variant_info = None,
+         **kwargs):
+     """Registers a shell action to run on an Apple machine.
+ 
+@@ -429,12 +446,16 @@ def _run_shell(
+         xcode_config: The xcode_config as found in the current rule or aspect's
+             context. Typically from `ctx.attr._xcode_config[apple_common.XcodeVersionConfig]`.
+         apple_fragment: A reference to the apple fragment. Typically from `ctx.fragments.apple`.
++        xcode_sdk_variant_info: Optional XcodeSdkVariantInfo provider. When provided with
++            developer_dir and sdk_root fields set, these paths will be used instead of
++            querying Xcode via xcrun.
+         **kwargs: See `ctx.actions.run_shell` for the rest of the available arguments.
+     """
+ 
+     actions.run_shell(**_kwargs_for_apple_platform(
+         xcode_config = xcode_config,
+         apple_fragment = apple_fragment,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+         **kwargs
+     ))
+ 
+diff --git a/lib/lipo.bzl b/lib/lipo.bzl
+index 8bf6b54..55e73ec 100644
+--- a/lib/lipo.bzl
++++ b/lib/lipo.bzl
+@@ -26,7 +26,8 @@ def _create(
+         inputs,
+         output,
+         apple_fragment,
+-        xcode_config):
++        xcode_config,
++        xcode_sdk_variant_info = None):
+     """Creates a universal binary by combining other binaries.
+ 
+     Args:
+@@ -42,6 +43,9 @@ def _create(
+             the action environment.
+         xcode_config: The `apple_common.XcodeVersionConfig` provider used to
+             configure the action environment.
++        xcode_sdk_variant_info: Optional XcodeSdkVariantInfo provider. When provided with
++            developer_dir and sdk_root fields set, these paths will be used instead of
++            querying Xcode via xcrun.
+     """
+     if not inputs:
+         fail("lipo.create requires at least one input file.")
+@@ -50,7 +54,7 @@ def _create(
+     # from lipo; "can't create temporary output file [...] (Permission denied)"
+     command = [
+         "mkdir -p {} &&".format(shell.quote(output.dirname)),
+-        "/usr/bin/lipo",
++        "lipo",
+         "-create",
+     ]
+     command.extend([
+@@ -67,6 +71,7 @@ def _create(
+         outputs = [output],
+         apple_fragment = apple_fragment,
+         xcode_config = xcode_config,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+     )
+ 
+ def _extract_or_thin(
+@@ -77,7 +82,8 @@ def _extract_or_thin(
+         input_shell_expression = None,
+         input_file = None,
+         output,
+-        xcode_config):
++        xcode_config,
++        xcode_sdk_variant_info = None):
+     """Extracts a subset of an existing universal binary based on the set of incoming architectures.
+ 
+     Args:
+@@ -96,6 +102,9 @@ def _extract_or_thin(
+         output: A `File` representing the universal binary that will be the output of the action.
+         xcode_config: The `apple_common.XcodeVersionConfig` provider used to configure the action
+             environment.
++        xcode_sdk_variant_info: Optional XcodeSdkVariantInfo provider. When provided with
++            developer_dir and sdk_root fields set, these paths will be used instead of
++            querying Xcode via xcrun.
+     """
+     if not input_file and not input_shell_expression:
+         fail("lipo.extract_or_thin needs a fat binary in `input_file` or `input_shell_expression`.")
+@@ -112,7 +121,7 @@ Please use only `input_file` or `input_shell_expression` to express the intended
+     # can come from lipo; "can't create temporary output file [...] (Permission denied)"
+     command = [
+         "mkdir -p {} &&".format(shell.quote(output.dirname)),
+-        "/usr/bin/lipo",
++        "lipo",
+     ]
+     if input_file:
+         command.append(shell.quote(input_file.path))
+@@ -135,6 +144,7 @@ Please use only `input_file` or `input_shell_expression` to express the intended
+         outputs = [output],
+         apple_fragment = apple_fragment,
+         xcode_config = xcode_config,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+         **extra_args
+     )
+ 
+diff --git a/rules/private/apple_genrule.bzl b/rules/private/apple_genrule.bzl
+index 6737f6b..4934c1a 100644
+--- a/rules/private/apple_genrule.bzl
++++ b/rules/private/apple_genrule.bzl
+@@ -16,6 +16,7 @@
+ 
+ load("@bazel_skylib//lib:dicts.bzl", "dicts")
+ load("//lib:apple_support.bzl", "apple_support")
++load("//xcode:providers.bzl", "XcodeSdkVariantInfo")
+ 
+ def _compute_make_variables(
+         genfiles_dir,
+@@ -54,6 +55,21 @@ def _apple_genrule_impl(ctx):
+ 
+     xcode_config = ctx.attr._xcode_config[apple_common.XcodeVersionConfig]
+ 
++    # Get XcodeSdkVariantInfo if available for custom SDK paths
++    # Only use it if the SDK's platform matches the target platform to avoid
++    # using iOS SDK for macOS exec tools (and vice versa)
++    xcode_sdk_variant_info = None
++    if XcodeSdkVariantInfo in ctx.attr._xcode_config:
++        sdk_info = ctx.attr._xcode_config[XcodeSdkVariantInfo]
++        if sdk_info.platform_name:
++            # Get the target platform from apple_fragment
++            target_platform = str(ctx.fragments.apple.single_arch_platform)
++            sdk_platform = sdk_info.platform_name.lower()
++            # Only use XcodeSdkVariantInfo if platforms match
++            # e.g., "iphonesimulator" matches "IPHONESIMULATOR", "macos" matches "MACOSX"
++            if sdk_platform in target_platform.lower() or target_platform.lower() in sdk_platform:
++                xcode_sdk_variant_info = sdk_info
++
+     resolved_inputs, argv, _runfiles_manifests = ctx.resolve_command(
+         command = ctx.attr.cmd,
+         attribute = "cmd",
+@@ -78,6 +94,7 @@ def _apple_genrule_impl(ctx):
+     apple_support.run(
+         actions = ctx.actions,
+         xcode_config = xcode_config,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+         apple_fragment = ctx.fragments.apple,
+         executable = argv[0],
+         arguments = argv[1:],
+diff --git a/rules/universal_binary.bzl b/rules/universal_binary.bzl
+index c2de056..1a2d4fc 100644
+--- a/rules/universal_binary.bzl
++++ b/rules/universal_binary.bzl
+@@ -18,6 +18,7 @@ load("@bazel_skylib//lib:dicts.bzl", "dicts")
+ load("//lib:apple_support.bzl", "apple_support")
+ load("//lib:lipo.bzl", "lipo")
+ load("//lib:transitions.bzl", "macos_universal_transition")
++load("//xcode:providers.bzl", "XcodeSdkVariantInfo")
+ 
+ def _universal_binary_impl(ctx):
+     inputs = [
+@@ -31,6 +32,11 @@ def _universal_binary_impl(ctx):
+ 
+     output = ctx.actions.declare_file(ctx.label.name)
+ 
++    # Get XcodeSdkVariantInfo if available for custom SDK paths
++    xcode_sdk_variant_info = None
++    if XcodeSdkVariantInfo in ctx.attr._xcode_config:
++        xcode_sdk_variant_info = ctx.attr._xcode_config[XcodeSdkVariantInfo]
++
+     if len(inputs) > 1:
+         lipo.create(
+             actions = ctx.actions,
+@@ -38,6 +44,7 @@ def _universal_binary_impl(ctx):
+             inputs = inputs,
+             output = output,
+             xcode_config = ctx.attr._xcode_config[apple_common.XcodeVersionConfig],
++            xcode_sdk_variant_info = xcode_sdk_variant_info,
+         )
+ 
+     else:
+diff --git a/xcode/providers.bzl b/xcode/providers.bzl
+index dc1c87a..e25be0e 100644
+--- a/xcode/providers.bzl
++++ b/xcode/providers.bzl
+@@ -36,6 +36,12 @@ XcodeSdkVariantInfo = provider(
+             `list[str]`. The CPU architectures that are valid target
+             architectures when building with this SDK.
+             """,
++        "developer_dir": """\
++            `str`. The path to the Developer directory (equivalent to
++            DEVELOPER_DIR). When set along with `sdk_root`, this allows
++            using a custom SDK (e.g., from nixpkgs) instead of relying on
++            xcode-locator to find Xcode on the host system.
++            """,
+         "build_version": """\
+             `str`. The alpha-numeric build version component of the SDK. This is
+             most often used to distinguish between different beta releases of
+@@ -104,9 +110,40 @@ XcodeSdkVariantInfo = provider(
+             form used when passing it to resource compiling tools. This is
+             typically the same as `platform_name`, but may differ for some SDKs.
+             """,
++        "sdk_root": """\
++            `str`. The path to the SDK root directory (equivalent to SDKROOT).
++            When set along with `developer_dir`, this allows using a custom SDK
++            (e.g., from nixpkgs) instead of relying on xcode-locator to find
++            Xcode on the host system.
++            """,
+         "version": """\
+             `apple_common.dotted_version`. The full version string for this SDK,
+             which is of the form `<major>.<minor>.<patch>`.
+             """,
+     },
+ )
++
++AppleSdkPathsInfo = provider(
++    doc = """\
++        Provides paths to a custom Apple SDK.
++
++        This provider is used by SDK repositories (e.g., nixpkgs_apple_sdk) to
++        declare the paths to their SDK files. These paths can then be consumed
++        by xcode_sdk_variant to set the developer_dir and sdk_root fields,
++        allowing builds without requiring Xcode to be installed.
++        """,
++    fields = {
++        "developer_dir": """\
++            `str`. The path to the Developer directory (DEVELOPER_DIR).
++            """,
++        "platform_name": """\
++            `str`. The platform name (e.g., 'MacOSX', 'iPhoneOS').
++            """,
++        "sdk_root": """\
++            `str`. The path to the SDK root directory (SDKROOT).
++            """,
++        "sdk_version": """\
++            `str`. The SDK version string (e.g., '14.4').
++            """,
++    },
++)
+diff --git a/xcode/xcode_config.bzl b/xcode/xcode_config.bzl
+index d87ce0d..494b400 100644
+--- a/xcode/xcode_config.bzl
++++ b/xcode/xcode_config.bzl
+@@ -175,6 +175,7 @@ of registered aliases.
+ """,
+     fragments = ["apple", "cpp"],
+     implementation = _xcode_config_impl,
++    provides = [XcodeVersionPropertiesInfo],
+ )
+ 
+ def _use_available_xcodes(
+diff --git a/xcode/xcode_sdk_variant.bzl b/xcode/xcode_sdk_variant.bzl
+index a3abad0..1929eba 100644
+--- a/xcode/xcode_sdk_variant.bzl
++++ b/xcode/xcode_sdk_variant.bzl
+@@ -16,6 +16,7 @@
+ 
+ load(
+     "@build_bazel_apple_support//xcode:providers.bzl",
++    "AppleSdkPathsInfo",
+     "XcodeSdkVariantInfo",
+ )
+ 
+@@ -27,11 +28,22 @@ def _xcode_sdk_variant_impl(ctx):
+             return None
+         return apple_common.dotted_version(str)
+ 
++    # Get SDK paths from the sdk_paths attribute if provided, otherwise use direct attributes
++    developer_dir = ctx.attr.developer_dir
++    sdk_root = ctx.attr.sdk_root
++    if ctx.attr.sdk_paths and AppleSdkPathsInfo in ctx.attr.sdk_paths:
++        sdk_paths_info = ctx.attr.sdk_paths[AppleSdkPathsInfo]
++        if not developer_dir:
++            developer_dir = sdk_paths_info.developer_dir
++        if not sdk_root:
++            sdk_root = sdk_paths_info.sdk_root
++
+     return [
+         XcodeSdkVariantInfo(
+             archs = ctx.attr.archs,
+             build_version = ctx.attr.build_version,
+             clangrt_name = ctx.attr.clangrt_name,
++            developer_dir = developer_dir,
+             device_families = ctx.attr.device_families,
+             llvm_triple_environment = ctx.attr.llvm_triple_environment,
+             llvm_triple_os = ctx.attr.llvm_triple_os,
+@@ -51,6 +63,7 @@ def _xcode_sdk_variant_impl(ctx):
+             platform_directory_name = ctx.attr.platform_directory_name,
+             platform_name = ctx.attr.platform_name,
+             resources_platform_name = ctx.attr.resources_platform_name,
++            sdk_root = sdk_root,
+             version = dotted_version_or_none(ctx.attr.version),
+         ),
+     ]
+@@ -78,6 +91,13 @@ xcode_sdk_variant = rule(
+                 using features that require them, such as sanitizers.
+             """,
+         ),
++        "developer_dir": attr.string(
++            doc = """\
++                The path to the Developer directory (DEVELOPER_DIR). When set
++                along with `sdk_root`, this allows using a custom SDK without
++                requiring Xcode to be installed.
++            """,
++        ),
+         "device_families": attr.string_dict(
+             doc = """\
+                 The device families that are supported when compiling resources
+@@ -157,6 +177,23 @@ xcode_sdk_variant = rule(
+                 SDKs.
+                 """,
+         ),
++        "sdk_paths": attr.label(
++            doc = """\
++                A target that provides AppleSdkPathsInfo. This allows SDK
++                paths to be derived from a custom SDK repository (e.g.,
++                nixpkgs_apple_sdk). If provided, developer_dir and sdk_root
++                will be taken from this provider unless overridden by the
++                direct attributes.
++            """,
++            providers = [[AppleSdkPathsInfo]],
++        ),
++        "sdk_root": attr.string(
++            doc = """\
++                The path to the SDK root directory (SDKROOT). When set along
++                with `developer_dir`, this allows using a custom SDK without
++                requiring Xcode to be installed.
++            """,
++        ),
+         "version": attr.string(
+             doc = """\
+                 The full version string for this SDK, which is of the form

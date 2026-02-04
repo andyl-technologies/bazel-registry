@@ -1,0 +1,16 @@
+--- cc.nix.orig
++++ cc.nix
+@@ -365,4 +365,13 @@
+     write_info SUPPORTS_START_END_LIB
+     write_info IS_CLANG
+     write_info CONLY_FLAGS
++
++    # Darwin-specific tools needed for hermetic cc_wrapper.sh
++    # These provide absolute paths to bash, coreutils, and install_name_tool
++    # so the wrapper doesn't depend on PATH or /usr/bin
++    echo "BASH:${pkgs.bash}/bin/bash" >>$out/CC_TOOLCHAIN_INFO
++    echo "COREUTILS:${pkgs.coreutils}/bin" >>$out/CC_TOOLCHAIN_INFO
++    ${if stdenv.isDarwin then ''
++    echo "INSTALL_NAME_TOOL:${pkgs.darwin.cctools}/bin/install_name_tool" >>$out/CC_TOOLCHAIN_INFO
++    '' else ""}
+   ''

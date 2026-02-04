@@ -1,0 +1,63 @@
+--- cc.bzl.orig
++++ cc.bzl
+@@ -53,6 +53,9 @@ def _parse_cc_toolchain_info(content, filename):
+     #
+     #   <key>:<value1>:<value2>:...
+     info = {}
++    # Optional keys that may not be present on all platforms
++    optional_keys = sets.make(["BASH", "COREUTILS", "INSTALL_NAME_TOOL"])
++
+     for line in content.splitlines():
+         fields = line.split(":")
+         if len(fields) == 0:
+@@ -85,7 +88,8 @@ def _parse_cc_toolchain_info(content, filename):
+     actual_keys = sets.make(info.keys())
+     missing_keys = sets.difference(expected_keys, actual_keys)
+     unexpected_keys = sets.difference(actual_keys, expected_keys)
+-    if sets.length(missing_keys) > 0:
++    # Filter out optional keys from missing keys check
++    if sets.length(sets.difference(missing_keys, optional_keys)) > 0:
+         fail(
+             "Malformed CC_TOOLCHAIN_INFO '{}': Missing entries '{}'.".format(
+                 filename,
+@@ -93,7 +97,8 @@ def _parse_cc_toolchain_info(content, filename):
+             ),
+             "cc_toolchain_info",
+         )
+-    if sets.length(unexpected_keys) > 0:
++    # Filter out optional keys from unexpected keys check
++    if sets.length(sets.difference(unexpected_keys, optional_keys)) > 0:
+         fail(
+             "Malformed CC_TOOLCHAIN_INFO '{}': Unexpected entries '{}'.".format(
+                 filename,
+@@ -120,6 +125,10 @@ def _parse_cc_toolchain_info(content, filename):
+         supports_start_end_lib = info["SUPPORTS_START_END_LIB"] == ["True"],
+         is_clang = info["IS_CLANG"] == ["True"],
+         conly_flags = info["CONLY_FLAGS"],
++        # Darwin-specific hermetic tool paths (may be empty on Linux)
++        bash = info.get("BASH", [""])[0],
++        coreutils = info.get("COREUTILS", [""])[0],
++        install_name_tool = info.get("INSTALL_NAME_TOOL", [""])[0],
+     )
+
+ def _nixpkgs_cc_toolchain_config_impl(repository_ctx):
+@@ -180,8 +189,17 @@ def _nixpkgs_cc_toolchain_config_impl(repository_ctx):
+     repository_ctx.template(
+         "cc_wrapper.sh",
+         repository_ctx.path(cc_wrapper_src),
+-        {
++        ({
+             "%{cc}": info.tool_paths["gcc"],
+             "%{env}": "",
+-        },
++        } | ({
++            # Darwin-specific: use absolute paths for hermetic builds
++            "%{bash}": info.bash,
++            "%{dirname}": info.coreutils + "/dirname",
++            "%{basename}": info.coreutils + "/basename",
++            "%{install_name_tool}": info.install_name_tool,
++        } if darwin and info.bash else {
++            # Linux: keep env bash (usually works) or provide sensible defaults
++            "%{bash}": "/usr/bin/env bash",
++        })),
+     )

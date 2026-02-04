@@ -1,0 +1,19 @@
+--- cc.nix.orig
++++ cc.nix
+@@ -343,7 +343,15 @@
+       unset IFS
+     }
+     write_info TOOL_NAMES
+-    write_info TOOL_PATHS
++    # Write TOOL_PATHS in the same order as TOOL_NAMES
++    # (bash associative arrays have arbitrary iteration order, so we can't use write_info)
++    {
++      echo -n "TOOL_PATHS"
++      for tool in "''${TOOL_NAMES[@]}"; do
++        echo -n ":''${TOOL_PATHS[$tool]}"
++      done
++      echo
++    } >>$out/CC_TOOLCHAIN_INFO
+     write_info CXX_BUILTIN_INCLUDE_DIRECTORIES
+     write_info COMPILE_FLAGS
+     write_info CXX_FLAGS

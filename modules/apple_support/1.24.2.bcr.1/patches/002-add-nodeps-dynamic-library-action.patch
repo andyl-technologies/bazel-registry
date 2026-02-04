@@ -1,0 +1,37 @@
+--- a/crosstool/cc_toolchain_config.bzl
++++ b/crosstool/cc_toolchain_config.bzl
+@@ -299,6 +299,26 @@
+         ],
+     )
+ 
++    cpp_link_nodeps_dynamic_library_action = action_config(
++        action_name = ACTION_NAMES.cpp_link_nodeps_dynamic_library,
++        implies = [
++            "has_configured_linker_path",
++            "shared_flag",
++            "linkstamps",
++            "output_execpath_flags",
++            "runtime_root_flags",
++            "input_param_flags",
++            "strip_debug_symbols",
++            "linker_param_file",
++        ],
++        tools = [
++            tool(
++                tool = ctx.file.cc_wrapper,
++                execution_requirements = xcode_execution_requirements,
++            ),
++        ],
++    )
++
+     cpp_link_static_library_action = action_config(
+         action_name = ACTION_NAMES.cpp_link_static_library,
+         implies = [
+@@ -603,6 +623,7 @@
+         objc_executable_action,
+         cpp_link_executable_action,
+         cpp_link_dynamic_library_action,
++        cpp_link_nodeps_dynamic_library_action,
+         cpp_link_static_library_action,
+         objc_fully_link_action,
+     ]

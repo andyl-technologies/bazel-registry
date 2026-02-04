@@ -1,0 +1,64 @@
+diff --git a/rules/aar_import/impl.bzl b/rules/aar_import/impl.bzl
+index 527c5a5..5b337d4 100644
+--- a/rules/aar_import/impl.bzl
++++ b/rules/aar_import/impl.bzl
+@@ -395,6 +395,7 @@ def _validate_rule(
+         mnemonic = "ValidateAAR",
+         progress_message = "Validating aar_import %s" % str(ctx.label),
+         toolchain = None,
++        use_default_shell_env = True,
+     )
+     return validation_output
+ 
+diff --git a/rules/busybox.bzl b/rules/busybox.bzl
+index 164df4f..4d98aad 100644
+--- a/rules/busybox.bzl
++++ b/rules/busybox.bzl
+@@ -429,6 +429,7 @@ def _package(
+         outputs = output_files,
+         mnemonic = "PackageAndroidResources",
+         progress_message = "Packaging Android Resources in %s" % ctx.label,
++        use_default_shell_env = True,
+     )
+ 
+ def _parse(
+@@ -650,6 +651,7 @@ def _validate_and_link(
+         mnemonic = "LinkAndroidResources",
+         progress_message =
+             "Linking Android Resources in " + out_file.short_path,
++        use_default_shell_env = True,
+     )
+ 
+ def _compile(
+@@ -706,6 +708,7 @@ def _compile(
+         outputs = [out_file],
+         mnemonic = "CompileAndroidResources",
+         progress_message = "Compiling Android Resources in %s" % out_file.short_path,
++        use_default_shell_env = True,
+     )
+ 
+ def _make_merge_compiled_flags(resources_node_info):
+diff --git a/rules/resources.bzl b/rules/resources.bzl
+index e82c640..a7b11e7 100644
+--- a/rules/resources.bzl
++++ b/rules/resources.bzl
+@@ -229,6 +229,7 @@ def _add_g3itr(
+         arguments = [args],
+         inputs = [manifest, instrument_xslt],
+         outputs = [out_manifest],
++        use_default_shell_env = True,
+         mnemonic = "AddG3ITRStarlark",
+         progress_message = "Adding G3ITR to test manifest for %s" % ctx.label,
+         toolchain = None,
+diff --git a/tools/jdk/system.bzl b/tools/jdk/system.bzl
+index f2ad0eb..5147ddf 100644
+--- a/tools/jdk/system.bzl
++++ b/tools/jdk/system.bzl
+@@ -104,6 +104,7 @@ def _android_system(ctx):
+         outputs = [system],
+         arguments = [args],
+         executable = ctx.executable.create_system,
++        use_default_shell_env = True,
+         mnemonic = "CreateSystem",
+     )
+ 
