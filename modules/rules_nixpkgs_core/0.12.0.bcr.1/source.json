@@ -4,6 +4,6 @@
   "strip_prefix": "rules_nixpkgs-cb0f9be1798131ea4336fd02b850edeeb1972680/core",
   "patch_strip": 1,
   "patches": {
-    "patches/001-hermetic-osx-cc-wrapper.patch": "sha256-dvMT/pJAS7tBIbHbplLFgd2UoU3BlfWBgC1FGAu9nuE="
+    "001-hermetic-osx-cc-wrapper.patch": "sha256-dvMT/pJAS7tBIbHbplLFgd2UoU3BlfWBgC1FGAu9nuE="
   }
 }

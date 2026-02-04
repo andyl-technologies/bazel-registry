@@ -4,7 +4,8 @@
   "strip_prefix": "rules_foreign_cc-0.15.1",
   "patch_strip": 1,
   "patches": {
-    "patches/001-respect-custom-sdk-paths.patch": "sha256-bLmIgIN822fA3SnlKpJH2Frt7+QRVG+0dlhlFjvi8Ro=",
-    "patches/002-pass-toolchain-tools-as-make-args.patch": "sha256-MotCRbBnltjf7m+QafVa9/4+5hBPuywHNdbWN2Hjowo="
+    "001-module-dot-bazel-version.patch": "sha256-lw6vtWZLjDTGfvojXBLerDko2xi3Sp7BtYtXqW3IsFs=",
+    "002-respect-custom-sdk-paths.patch": "sha256-bLmIgIN822fA3SnlKpJH2Frt7+QRVG+0dlhlFjvi8Ro=",
+    "003-pass-toolchain-tools-as-make-args.patch": "sha256-MotCRbBnltjf7m+QafVa9/4+5hBPuywHNdbWN2Hjowo="
   }
 }
