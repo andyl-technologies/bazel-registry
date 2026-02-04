@@ -54,3 +54,7 @@ register_toolchains(
     "@local_jdk//:runtime_toolchain_definition",
     "@local_jdk//:bootstrap_runtime_toolchain_definition",
 )
+
+# Compatibility layer
+compat = use_extension("//java:rules_java_deps.bzl", "compatibility_proxy")
+use_repo(compat, "compatibility_proxy")

@@ -1,5 +1,5 @@
---- cc.nix.orig
-+++ cc.nix
+--- a/cc.nix
++++ b/cc.nix
 @@ -365,4 +365,13 @@
      write_info SUPPORTS_START_END_LIB
      write_info IS_CLANG

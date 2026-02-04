@@ -4,8 +4,8 @@
   "strip_prefix": "rules_nixpkgs-cb0f9be1798131ea4336fd02b850edeeb1972680/toolchains/cc",
   "patch_strip": 1,
   "patches": {
-    "001-fix-tool-paths-order.patch": "sha256-tZ2824XbIiqoYNlNHFp+pY25kNsvdSngXyfubmuBawE=",
-    "002-hermetic-cc-nix.patch": "sha256-9UaJyHyQ1BxQhy6AvGe08C5LqviZ8Z9uQigAPudG1P0=",
-    "003-hermetic-cc-bzl.patch": "sha256-SdeWas0HStCeBBvlyFwqc3FipMuG8q0Tna6fV0Wj77k="
+    "001-fix-tool-paths-order.patch": "sha256-4AMem/FMc0k2eOWaHcHxm10Fxv6No3HqrIQJv0rsnWU=",
+    "002-hermetic-cc-nix.patch": "sha256-156Zjx5gK4QpmioGRlWUUxcEaDz2mXlLfILzhycH4OM=",
+    "003-hermetic-cc-bzl.patch": "sha256-T0pgRuBGOTkNC1AsG2DjCZPNdRcIP7XdNLkcpCvvy+s="
   }
 }

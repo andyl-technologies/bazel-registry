@@ -1,5 +1,5 @@
---- cc.bzl.orig
-+++ cc.bzl
+--- a/cc.bzl
++++ b/cc.bzl
 @@ -53,6 +53,9 @@ def _parse_cc_toolchain_info(content, filename):
      #
      #   <key>:<value1>:<value2>:...
