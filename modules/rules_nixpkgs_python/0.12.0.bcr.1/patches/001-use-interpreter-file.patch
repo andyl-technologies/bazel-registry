@@ -1,5 +1,5 @@
---- python.bzl.orig
-+++ python.bzl
+--- a/python.bzl
++++ b/python.bzl
 @@ -91,7 +91,7 @@
      cat >>$n <<EOF
      py_runtime(

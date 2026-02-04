@@ -1,5 +1,5 @@
---- private/cc_toolchain/osx_cc_wrapper.sh.tpl
-+++ private/cc_toolchain/osx_cc_wrapper.sh.tpl
+--- a/private/cc_toolchain/osx_cc_wrapper.sh.tpl
++++ b/private/cc_toolchain/osx_cc_wrapper.sh.tpl
 @@ -1,4 +1,4 @@
 -#!/usr/bin/env bash
 +#!%{bash}

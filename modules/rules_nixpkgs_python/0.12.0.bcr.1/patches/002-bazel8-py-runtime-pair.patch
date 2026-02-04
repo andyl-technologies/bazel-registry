@@ -1,5 +1,5 @@
---- python.bzl
-+++ python.bzl
+--- a/python.bzl
++++ b/python.bzl
 @@ -27,7 +27,7 @@ def _nixpkgs_python_toolchain_impl(repository_ctx):
          python3_runtime = repository_ctx.attr.python3_repo + ":runtime"
 

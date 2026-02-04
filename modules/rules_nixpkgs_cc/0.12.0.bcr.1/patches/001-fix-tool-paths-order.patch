@@ -1,5 +1,5 @@
---- cc.nix.orig
-+++ cc.nix
+--- a/cc.nix
++++ b/cc.nix
 @@ -343,7 +343,15 @@
        unset IFS
      }

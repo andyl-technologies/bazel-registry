@@ -1,5 +1,5 @@
---- go.bzl
-+++ go.bzl
+--- a/go.bzl
++++ b/go.bzl
 @@ -140,7 +140,8 @@ def declare_toolchains(host_goos, host_goarch):
              goos = p.goos,
              goarch = p.goarch,

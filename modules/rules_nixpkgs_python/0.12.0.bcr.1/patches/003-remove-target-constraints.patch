@@ -1,5 +1,5 @@
---- python.bzl
-+++ python.bzl
+--- a/python.bzl
++++ b/python.bzl
 @@ -32,7 +32,6 @@ toolchain(
      toolchain = ":py_runtime_pair",
      toolchain_type = "@rules_python//python:toolchain_type",

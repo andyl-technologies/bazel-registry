@@ -4,8 +4,8 @@
   "strip_prefix": "rules_nixpkgs-cb0f9be1798131ea4336fd02b850edeeb1972680/toolchains/python",
   "patch_strip": 1,
   "patches": {
-    "001-use-interpreter-file.patch": "sha256-2+dMQMYuUOsXA0dyvoj5BMdhRIPJdAxazD+D+JMhTH8=",
-    "002-bazel8-py-runtime-pair.patch": "sha256-q08Mr9N525+H+uVb+HWghaX5jelq5AmR4ScgWcCMUqk=",
-    "003-remove-target-constraints.patch": "sha256-dz4QR5s1BDbLjmMFlYT8Rb7RjjCtGF7Jv8fSrRXhKHo="
+    "001-use-interpreter-file.patch": "sha256-EI9yATSTeMh5HrcO8B7Fbn9SB+U1tTaranydor1fRiQ=",
+    "002-bazel8-py-runtime-pair.patch": "sha256-Xlq3swv/K6YpzFe/j8++oeQKdm8mbEMzFejbNWENLcU=",
+    "003-remove-target-constraints.patch": "sha256-VZk5ZF12llutFbTo3EwNiF6/6kG3DnprIPBPuvCZJMs="
   }
 }

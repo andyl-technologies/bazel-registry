@@ -4,6 +4,6 @@
   "strip_prefix": "rules_nixpkgs-cb0f9be1798131ea4336fd02b850edeeb1972680/toolchains/go",
   "patch_strip": 1,
   "patches": {
-    "001-bazel8-pack-attribute.patch": "sha256-De3yqCQV0bPY4RQ8dQpeSm/sSxFBh6EjQM7gbynYqKo="
+    "001-bazel8-pack-attribute.patch": "sha256-+GzlJ6oYvTY0RfKCExh8XOlfzO0MABD7EF++3l51qPU="
   }
 }
