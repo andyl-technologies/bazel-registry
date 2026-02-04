@@ -1,0 +1,15 @@
+{
+    "homepage": "https://github.com/google/flatbuffers",
+    "maintainers": [
+        {
+            "github": "andyl-technologies"
+        }
+    ],
+    "repository": [
+        "github:google/flatbuffers"
+    ],
+    "versions": [
+        "25.9.23.bcr.1"
+    ],
+    "yanked_versions": {}
+}
