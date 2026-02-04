@@ -1,0 +1,82 @@
+"""Envoy Build - Hermetic Envoy/Envoy Mobile build system with nixpkgs toolchains."""
+
+module(
+    name = "envoy_build",
+    version = "0.1.0",
+    compatibility_level = 1,
+)
+
+# =============================================================================
+# Patched BCR Dependencies (from custom registry)
+# =============================================================================
+# These use .bcr.1 versions with patches for hermetic NixOS builds
+
+bazel_dep(name = "grpc", version = "1.76.0.bcr.1", repo_name = "com_github_grpc_grpc")
+bazel_dep(name = "apple_support", version = "1.24.2.bcr.1", repo_name = "build_bazel_apple_support")
+bazel_dep(name = "rules_foreign_cc", version = "0.15.1.bcr.1")
+bazel_dep(name = "rules_apple", version = "4.3.3.bcr.1", repo_name = "build_bazel_rules_apple")
+bazel_dep(name = "rules_java", version = "9.3.0.bcr.1")
+bazel_dep(name = "rules_android", version = "0.7.1.bcr.1")
+bazel_dep(name = "cel-cpp", version = "0.14.0.bcr.1", repo_name = "com_google_cel_cpp")
+bazel_dep(name = "rules_nixpkgs_core", version = "0.12.0.bcr.1")
+bazel_dep(name = "rules_nixpkgs_cc", version = "0.12.0.bcr.1")
+bazel_dep(name = "rules_nixpkgs_python", version = "0.12.0.bcr.1")
+bazel_dep(name = "rules_nixpkgs_go", version = "0.12.0.bcr.1")
+bazel_dep(name = "rules_nixpkgs_java", version = "0.12.0.bcr.1")
+bazel_dep(name = "rules_nixpkgs_rust", version = "0.12.0.bcr.1")
+
+# =============================================================================
+# Standard BCR Dependencies
+# =============================================================================
+
+bazel_dep(name = "bazel_skylib", version = "1.9.0")
+bazel_dep(name = "platforms", version = "1.0.0")
+bazel_dep(name = "rules_license", version = "1.0.0")
+bazel_dep(name = "rules_cc", version = "0.2.16")
+bazel_dep(name = "rules_proto", version = "7.1.0")
+bazel_dep(name = "rules_proto_grpc", version = "5.5.0")
+bazel_dep(name = "rules_proto_grpc_cpp", version = "5.5.0")
+bazel_dep(name = "rules_python", version = "1.8.3")
+bazel_dep(name = "rules_rust", version = "0.67.0")
+bazel_dep(name = "rules_shell", version = "0.6.1")
+bazel_dep(name = "rules_swift", version = "3.1.2", repo_name = "build_bazel_rules_swift")
+bazel_dep(name = "rules_kotlin", version = "2.2.1")
+bazel_dep(name = "rules_jvm_external", version = "6.9")
+bazel_dep(name = "rules_go", version = "0.58.3", repo_name = "io_bazel_rules_go")
+bazel_dep(name = "gazelle", version = "0.47.0", repo_name = "bazel_gazelle")
+bazel_dep(name = "rules_pkg", version = "1.2.0")
+bazel_dep(name = "rules_fuzzing", version = "0.5.2")
+bazel_dep(name = "aspect_bazel_lib", version = "2.14.0")
+
+# Core libraries
+bazel_dep(name = "protobuf", version = "33.4", repo_name = "com_google_protobuf")
+bazel_dep(name = "abseil-cpp", version = "20250814.1", repo_name = "com_google_absl")
+bazel_dep(name = "googletest", version = "1.17.0.bcr.2", repo_name = "com_google_googletest")
+bazel_dep(name = "google_benchmark", version = "1.9.4", repo_name = "com_google_benchmark")
+bazel_dep(name = "googleapis", version = "0.0.0-20260109-6145b5ff", repo_name = "com_google_googleapis")
+
+# Crypto & Compression
+bazel_dep(name = "boringssl", version = "0.20250415.0")
+bazel_dep(name = "zlib", version = "1.3.1.bcr.7")
+bazel_dep(name = "zstd", version = "1.5.7")
+bazel_dep(name = "brotli", version = "1.1.0", repo_name = "org_brotli")
+bazel_dep(name = "lz4", version = "1.10.0.bcr.1", repo_name = "com_github_lz4_lz4")
+
+# Networking & Utilities
+bazel_dep(name = "c-ares", version = "1.34.5.bcr.3", repo_name = "com_github_cares_cares")
+bazel_dep(name = "fmt", version = "12.1.0", repo_name = "com_github_fmtlib_fmt")
+bazel_dep(name = "spdlog", version = "1.17.0", repo_name = "com_github_gabime_spdlog")
+bazel_dep(name = "yaml-cpp", version = "0.8.0", repo_name = "com_github_jbeder_yaml_cpp")
+bazel_dep(name = "nlohmann_json", version = "3.11.3.bcr.1", repo_name = "com_github_nlohmann_json")
+bazel_dep(name = "flatbuffers", version = "25.9.23", repo_name = "com_github_google_flatbuffers")
+bazel_dep(name = "re2", version = "2025-08-12.bcr.1", repo_name = "com_googlesource_code_re2")
+bazel_dep(name = "xxhash", version = "0.8.3.bcr.1", repo_name = "com_github_cyan4973_xxhash")
+
+# CEL and xDS
+bazel_dep(name = "cel-spec", version = "0.25.1", repo_name = "dev_cel")
+bazel_dep(name = "xds", version = "0.0.0-20251210-ee656c7")
+bazel_dep(name = "protoc-gen-validate", version = "1.3.0")
+
+# SIMD & OpenTelemetry
+bazel_dep(name = "highway", version = "1.2.0")
+bazel_dep(name = "opentelemetry-proto", version = "1.8.0", repo_name = "opentelemetry_proto")
