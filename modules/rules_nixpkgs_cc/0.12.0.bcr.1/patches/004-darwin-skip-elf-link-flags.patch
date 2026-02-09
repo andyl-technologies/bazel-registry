@@ -1,5 +1,5 @@
---- cc.nix.orig
-+++ cc.nix
+--- a/cc.nix
++++ b/cc.nix
 @@ -244,8 +244,10 @@
      LINK_FLAGS=(
        $(
