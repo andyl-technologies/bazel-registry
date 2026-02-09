@@ -7,6 +7,6 @@
     "001-fix-tool-paths-order.patch": "sha256-4AMem/FMc0k2eOWaHcHxm10Fxv6No3HqrIQJv0rsnWU=",
     "002-hermetic-cc-nix.patch": "sha256-156Zjx5gK4QpmioGRlWUUxcEaDz2mXlLfILzhycH4OM=",
     "003-hermetic-cc-bzl.patch": "sha256-T0pgRuBGOTkNC1AsG2DjCZPNdRcIP7XdNLkcpCvvy+s=",
-    "004-darwin-skip-elf-link-flags.patch": "sha256-04S0N9QgeZDfHZbxqfbaS7sqDNOhx76icfEUs3OO9Fw="
+    "004-darwin-skip-elf-link-flags.patch": "sha256-syD7PnO8vUZgmJBhLmmiDjL8Pm+5nW8PH55/vz4zffg="
   }
 }
