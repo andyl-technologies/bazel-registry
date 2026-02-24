@@ -1,0 +1,22 @@
+--- a/rust.bzl
++++ b/rust.bzl
+@@ -21,15 +21,16 @@
+     build-triple = rust.toRustTargetSpec pkgs.stdenv.buildPlatform;
+     target-triple = rust.toRustTargetSpec pkgs.stdenv.targetPlatform;
+     rustc = if os == "macos" then
+-      # rustc on MacOS expects the `strip` binary in PATH, create a wrapper adding the bin
+-      # folder from `binutils` to the PATH
++      # rustc on MacOS expects `strip` and `dsymutil` in PATH.
++      # `strip` comes from cctools, `dsymutil` from darwin.binutils.bintools
++      # (cctools-binutils-darwin).
+       pkgs.symlinkJoin
+         {{
+           name = "rustc";
+           paths = [ pkgs.rustc ];
+           nativeBuildInputs = [ pkgs.makeWrapper ];
+           postBuild = ''
+-            wrapProgram $out/bin/rustc --suffix PATH : ${{pkgs.darwin.cctools}}/bin
++            wrapProgram $out/bin/rustc --suffix PATH : ${{pkgs.darwin.cctools}}/bin:${{pkgs.darwin.binutils.bintools}}/bin
+           '';
+         }}
+       else pkgs.rustc;
