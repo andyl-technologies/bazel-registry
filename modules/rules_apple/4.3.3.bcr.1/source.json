@@ -4,6 +4,7 @@
   "patch_strip": 1,
   "patches": {
     "001-module-dot-bazel-version.patch": "sha256-b56l5+00Bimlg9rn/JtTMeKHLmRTrBWBPVtZJZVnxbc=",
-    "002-pass-xcode-sdk-variant-info.patch": "sha256-aBCgUGvYNQEZgENg7HxUPbCx+YoWX3hT8Pd1Fq03WvA="
+    "002-pass-xcode-sdk-variant-info.patch": "sha256-aBCgUGvYNQEZgENg7HxUPbCx+YoWX3hT8Pd1Fq03WvA=",
+    "003-environment-plist-xcode-sdk-variant-info.patch": "sha256-J4WCeHSkJY671q/oFUY/OXpZZafAP5a3k0qPioK3pvY="
   }
 }

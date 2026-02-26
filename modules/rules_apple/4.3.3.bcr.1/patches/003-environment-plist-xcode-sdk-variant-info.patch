@@ -1,0 +1,34 @@
+diff --git i/apple/internal/environment_plist.bzl w/apple/internal/environment_plist.bzl
+index d5f71f03..89fe60b0 100644
+--- i/apple/internal/environment_plist.bzl
++++ w/apple/internal/environment_plist.bzl
+@@ -24,6 +24,10 @@ load(
+     "@build_bazel_apple_support//lib:apple_support.bzl",
+     "apple_support",
+ )
++load(
++    "@build_bazel_apple_support//xcode:providers.bzl",
++    "XcodeSdkVariantInfo",
++)
+ load(
+     "//apple/internal:apple_toolchains.bzl",
+     "AppleMacToolsToolchainInfo",
+@@ -65,6 +69,10 @@ def _environment_plist_impl(ctx):
+     environment_plist_tool = ctx.attr._mac_toolchain[AppleMacToolsToolchainInfo].environment_plist_tool
+     platform = platform_prerequisites.platform
+     sdk_version = platform_prerequisites.sdk_version
++
++    # Get XcodeSdkVariantInfo if available (for custom SDK paths like nixpkgs)
++    xcode_sdk_variant_info = ctx.attr._xcode_config[XcodeSdkVariantInfo] if XcodeSdkVariantInfo in ctx.attr._xcode_config else None
++
+     apple_support.run(
+         actions = ctx.actions,
+         apple_fragment = platform_prerequisites.apple_fragment,
+@@ -77,6 +85,7 @@ def _environment_plist_impl(ctx):
+         executable = environment_plist_tool,
+         outputs = [ctx.outputs.plist],
+         xcode_config = platform_prerequisites.xcode_version_config,
++        xcode_sdk_variant_info = xcode_sdk_variant_info,
+     )
+
+ environment_plist = rule(
